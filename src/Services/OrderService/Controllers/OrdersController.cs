@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Api.Data;
 using OrderService.Api.Entities;
 using OrderService.Api.Tracing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OrderService.Api.Controllers;
 
@@ -26,8 +27,9 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<Order>> Get() => await _db.Orders.Include(o => o.Items).AsNoTracking().ToListAsync();
 
-    [HttpPost]
-    // создаёт заказ и публикует доменное событие OrderCreated
+[HttpPost]
+[Authorize]
+// создаёт заказ и публикует доменное событие OrderCreated
     public async Task<ActionResult<Order>> Create(CreateOrderRequest request)
     {
         var traceId = HttpContext.Request.Headers["X-Trace-Id"].ToString();

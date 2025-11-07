@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Monolith.Application;
 using Monolith.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Monolith.Api.Controllers;
 
@@ -18,6 +19,7 @@ public class OrdersController : ControllerBase
     public record CreateOrderItem(Guid ProductId, int Quantity);
 
     [HttpPost]
+    [Authorize]
     // создаёт заказ по списку товаров без асинхронной шины
     public async Task<ActionResult<Order>> Create(CreateOrderDto dto, CancellationToken ct)
     {

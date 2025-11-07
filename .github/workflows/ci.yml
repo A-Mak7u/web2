@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore .NET
+        run: dotnet restore ./WebShop.sln
+
+      - name: Build .NET
+        run: dotnet build ./WebShop.sln --configuration Release --no-restore
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install WebApp deps
+        working-directory: ./src/WebApp
+        run: npm ci
+
+      - name: Build WebApp
+        working-directory: ./src/WebApp
+        run: npm run build
+

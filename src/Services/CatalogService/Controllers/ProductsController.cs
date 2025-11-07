@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using CatalogService.Api.Tracing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CatalogService.Api.Controllers;
 
@@ -60,6 +61,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<Product>> Create(Product product)
     {
         _db.Products.Add(product);

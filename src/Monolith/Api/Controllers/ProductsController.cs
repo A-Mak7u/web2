@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Monolith.Application;
 using Monolith.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Monolith.Api.Controllers;
 
@@ -15,6 +16,7 @@ public class ProductsController : ControllerBase
     public async Task<IEnumerable<Product>> Get(CancellationToken ct) => await _service.GetAllAsync(ct);
 
     [HttpPost]
+    [Authorize]
     // добавление нового продукта и возврат 201 Created
     public async Task<ActionResult<Product>> Create(Product product, CancellationToken ct)
     {

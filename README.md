@@ -5,19 +5,16 @@
 ![.NET](https://img.shields.io/badge/.NET-9-512BD4?logo=dotnet&logoColor=white) ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4) ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.x-FF6600?logo=rabbitmq&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white) ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=061A23)
 
 ## Содержание
-- **[Архитектура и структура проекта](#архитектура-и-структура-проекта)**
-- **[Быстрый старт (Docker)](#быстрый-старт-docker)**
-- **[Локальная разработка](#локальная-разработка)**
+- **[Архитектура и компоненты](#архитектура-и-компоненты)**
+- **[Как это работает](#как-это-работает)**
 - **[Сервисы и API](#сервисы-и-api)**
-- **[Фронтенд (WebApp)](#фронтенд-webapp)**
-- **[Скрипты](#скрипты)**
-- **[Переменные окружения и конфигурация](#переменные-окружения-и-конфигурация)**
-- **[Трассировка и сценарии](#трассировка-и-сценарии)**
+- **[Фронтенд](#фронтенд)**
+- **[Трассировка](#трассировка)**
 - **[Требования задания и реализация](#требования-задания-и-реализация)**
 - **[Состояние проекта](#состояние-проекта)**
-- **[Дальнейшие планы](#дальнейшие-планы)**
+- **[Технологии](#технологии)**
 
-## Архитектура и структура проекта
+## Архитектура и компоненты
 
 ```
 WebShop.sln
@@ -44,72 +41,20 @@ src/
 
 - **Репозиторий решений**: `WebShop.sln`
 - **Docker Compose**: [`docker-compose.yml`](./docker-compose.yml)
-- **Инициализация БД**: [`docker/postgres/init.sql`](./docker/postgres/init.sql)
-- **Скрипты**: [`scripts/start.ps1`](./scripts/start.ps1), [`scripts/open-swagger.ps1`](./scripts/open-swagger.ps1)
 - **Монолит**: [`src/Monolith/Api`](./src/Monolith/Api)
 - **Микросервисы**: [`src/Services`](./src/Services)
 - **Контракты событий**: [`src/Shared/Contracts`](./src/Shared/Contracts)
 - **Фронтенд**: [`src/WebApp`](./src/WebApp)
 
-## Быстрый старт (Docker)
-1. Установите Docker Desktop
-2. В корне проекта выполните:
+## Как это работает
 
-```bash
-docker compose up -d --build
-```
+- **Аутентификация (IdentityService)**: регистрация и вход пользователя с выдачей JWT. Токен используется клиентом при обращении к защищённым API (в проекте показана выдача и потребление токена; строгие политики можно включить атрибутами `[Authorize]`).
+- **Каталог (CatalogService)**: чтение товаров из PostgreSQL, ответы кэшируются в Redis на несколько минут. При добавлении товара кэш инвалидацируется.
+- **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Это пример хореографии распределённой транзакции.
+- **Монолит**: содержит схожие функции (продукты, заказы) внутри одного приложения и общей БД/кэша, демонстрируя подход Clean Architecture.
+- **Трассировка**: сервисы принимают заголовок `X-Trace-Id` и пишут сообщения в локальное хранилище событий; фронтенд собирает ленту из всех сервисов и показывает тайм‑линию.
 
-Откроются сервисы и порты:
-
-- **Monolith**: `http://localhost:5000` (Swagger: `http://localhost:5000/swagger`)
-- **Identity**: `http://localhost:5001` (Swagger: `http://localhost:5001/swagger`)
-- **Catalog**: `http://localhost:5002` (Swagger: `http://localhost:5002/swagger`)
-- **Order**: `http://localhost:5003` (Swagger: `http://localhost:5003/swagger`)
-- **Payment**: `http://localhost:5004` (Swagger: `http://localhost:5004/swagger`)
-- **WebApp**: `http://localhost:5173`
-- **RabbitMQ UI**: `http://localhost:15672` (логин/пароль: `guest/guest`)
-- **PostgreSQL**: `localhost:5432` (`postgres/postgres`)
-- **Redis**: `localhost:6379`
-
-Полезно: открыть Swagger для всех сервисов:
-
-```powershell
-./scripts/open-swagger.ps1 -Start
-```
-
-Авто‑скрипт запуска и проверки потока:
-
-```powershell
-./scripts/start.ps1
-```
-
-## Локальная разработка
-
-Вариант с Docker‑инфраструктурой и локальным запуском приложений:
-
-1) Поднять инфраструктуру:
-
-```bash
-docker compose up -d postgres rabbitmq redis
-```
-
-2) Запустить сервисы (в отдельных терминалах):
-
-```bash
-dotnet run --project ./src/Services/IdentityService/IdentityService.Api.csproj
-dotnet run --project ./src/Services/CatalogService/CatalogService.Api.csproj
-dotnet run --project ./src/Services/OrderService/OrderService.Api.csproj
-dotnet run --project ./src/Services/PaymentService/PaymentService.Api.csproj
-dotnet run --project ./src/Monolith/Api/Monolith.Api.csproj
-```
-
-3) Запустить фронтенд:
-
-```bash
-cd ./src/WebApp
-npm i
-npm run dev
-```
+ 
 
 ## Сервисы и API
 
@@ -159,10 +104,9 @@ public interface OrderCreated { Guid OrderId { get; } Guid CustomerId { get; } d
 public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } }
 ```
 
-## Фронтенд (WebApp)
+## Фронтенд
 - Путь: [`src/WebApp`](./src/WebApp)
 - Стек: React 18, Vite 5, TypeScript, Chakra UI
-- Скрипты: `npm run dev`, `npm run build`, `npm run preview`
 - Возможности UI:
   - Регистрация/вход (JWT) через IdentityService
   - Каталог из CatalogService, добавление в корзину, оформление заказа (OrderService)
@@ -173,36 +117,9 @@ public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } 
 - [`src/WebApp/src/App.tsx`](./src/WebApp/src/App.tsx) — UI магазина + корзина
 - [`src/WebApp/src/Flow.tsx`](./src/WebApp/src/Flow.tsx) — демонстрация трассировки
 
-## Скрипты
-- **`scripts/start.ps1`** — поднимает контейнеры, проверяет готовность, выполняет сценарий (регистрация, логин, каталог, создание заказа).
-- **`scripts/open-swagger.ps1`** — открывает Swagger всех сервисов. Ключ `-Start` предварительно запустит контейнеры.
+ 
 
-## Переменные окружения и конфигурация
-
-PostgreSQL создаётся ини‑скриптом [`docker/postgres/init.sql`](./docker/postgres/init.sql).
-
-- **Identity** [`appsettings.json`](./src/Services/IdentityService/appsettings.json)
-  - `ConnectionStrings:DefaultConnection = Host=postgres;Port=5432;Database=identity_db;Username=postgres;Password=postgres`
-  - `Jwt:Issuer = webshop-identity`
-  - `Jwt:Audience = webshop-clients`
-  - `Jwt:Key = SuperSecretDevelopmentKey_ChangeInProd_1234567890`
-- **Catalog** [`appsettings.json`](./src/Services/CatalogService/appsettings.json)
-  - `ConnectionStrings:DefaultConnection = Host=postgres;Port=5432;Database=catalog_db;Username=postgres;Password=postgres`
-  - `Redis:Configuration = redis:6379`, `Redis:InstanceName = catalog:`
-- **Order** [`appsettings.json`](./src/Services/OrderService/appsettings.json)
-  - `ConnectionStrings:DefaultConnection = Host=postgres;Port=5432;Database=order_db;Username=postgres;Password=postgres`
-  - `RabbitMq:Host = rabbitmq`, `Username = guest`, `Password = guest`
-- **Payment** [`appsettings.json`](./src/Services/PaymentService/appsettings.json)
-  - `RabbitMq:Host = rabbitmq`, `Username = guest`, `Password = guest`
-- **Монолит** [`appsettings.json`](./src/Monolith/Api/appsettings.json)
-  - `ConnectionStrings:DefaultConnection = Host=postgres;Port=5432;Database=monolith_db;Username=postgres;Password=postgres`
-  - `Redis:Configuration = redis:6379`, `Redis:InstanceName = monolith:`
-
-Примечания:
-- Для локального запуска используется `EnsureCreated()` вместо миграций EF Core.
-- Секреты (JWT key и т.п.) хранятся в конфиге только для дев‑сценария; в продакшене используйте переменные окружения или Secret Manager.
-
-## Трассировка и сценарии
+## Трассировка
 
 - Все сервисы принимают заголовок `X-Trace-Id` и пишут события в локальный `TraceStore`.
 - В каждом сервисе доступны:
@@ -246,15 +163,13 @@ PostgreSQL создаётся ини‑скриптом [`docker/postgres/init.s
 - [ ] `[Authorize]` на бизнес‑эндпойнтах — по требованию
 - [ ] Тесты и CI/CD
 
-## Дальнейшие планы
+## Технологии
 
-- Добавить EF‑миграции и включить Outbox (EF) для надёжной доставки событий
-- Закрыть публичные эндпойнты атрибутами `[Authorize]` и скопами
-- Добавить конфигурацию через переменные окружения (prod/dev)
-- Вынести UI‑конфиг эндпойнтов в `.env`
-- Автоматические тесты, линтинг и GitHub Actions
-
----
-
-Если что‑то сломалось или есть идеи улучшений — создавайте issue/PR. Удачи!
+- .NET 9 / ASP.NET Core Web API
+- EF Core + PostgreSQL
+- MassTransit + RabbitMQ
+- Redis (StackExchange.Redis Cache)
+- Docker / Docker Compose
+- React 18 + Vite 5 + TypeScript + Chakra UI
+- OpenAPI/Swagger
 

@@ -1,3 +1,14 @@
+.git
+.github
+.gitignore
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+**/.env*
 bin/
 obj/
 .git/

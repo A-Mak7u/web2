@@ -1,0 +1,15 @@
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\bin\Release\net9.0\Monolith.Application.deps.json
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\bin\Release\net9.0\Monolith.Application.dll
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\bin\Release\net9.0\Monolith.Application.pdb
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\bin\Release\net9.0\Monolith.Domain.dll
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\bin\Release\net9.0\Monolith.Domain.pdb
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.csproj.AssemblyReference.cache
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.AssemblyInfoInputs.cache
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.AssemblyInfo.cs
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.csproj.CoreCompileInputs.cache
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.0F15A78E.Up2Date
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.dll
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\refint\Monolith.Application.dll
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\Monolith.Application.pdb
+C:\Users\Maks\Desktop\web2\src\Monolith\Application\obj\Release\net9.0\ref\Monolith.Application.dll

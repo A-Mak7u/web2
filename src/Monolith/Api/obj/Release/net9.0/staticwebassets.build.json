@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "U1i479gBos8KWDb9/GMfv4N0n14hYXv1jF1NmeXl9CU=",
+  "Source": "Monolith.Api",
+  "BasePath": "_content/Monolith.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

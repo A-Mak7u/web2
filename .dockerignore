@@ -1,0 +1,13 @@
+bin/
+obj/
+.git/
+.vscode/
+**/*.user
+**/*.swp
+**/*.suo
+**/*.csproj.user
+Dockerfile
+**/Dockerfile
+
+
+

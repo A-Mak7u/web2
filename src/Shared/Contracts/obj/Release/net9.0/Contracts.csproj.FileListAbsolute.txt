@@ -1,0 +1,11 @@
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\bin\Release\net9.0\Contracts.deps.json
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\bin\Release\net9.0\Contracts.dll
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\bin\Release\net9.0\Contracts.pdb
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.AssemblyInfoInputs.cache
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.AssemblyInfo.cs
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.csproj.CoreCompileInputs.cache
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.dll
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\refint\Contracts.dll
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\Contracts.pdb
+C:\Users\Maks\Desktop\web2\src\Shared\Contracts\obj\Release\net9.0\ref\Contracts.dll

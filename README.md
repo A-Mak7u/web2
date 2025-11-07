@@ -54,6 +54,7 @@ src/
 - **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Публикация событий в `OrderService` выполняется через транзакционный outbox (MassTransit EF Outbox + Bus Outbox) для атомарности. Это пример хореографии распределённой транзакции.
 - **Монолит**: содержит схожие функции (продукты, заказы) внутри одного приложения и общей БД/кэша, демонстрируя подход Clean Architecture.
 - **Трассировка**: сервисы принимают заголовок `X-Trace-Id` и пишут сообщения в локальное хранилище событий; фронтенд собирает ленту из всех сервисов и показывает тайм‑линию.
+ - **Безопасность**: write‑эндпойнты защищены JWT (`[Authorize]`) в CatalogService, OrderService и Монолите; чтение (GET) оставлено публичным для удобства демонстрации.
 
  
 
@@ -143,7 +144,7 @@ public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } 
 - Подключить шину данных (RabbitMQ)
   - Реализовано: MassTransit + RabbitMQ — конфиг в `Program.cs` сервисов: [`OrderService`](./src/Services/OrderService/Program.cs), [`PaymentService`](./src/Services/PaymentService/Program.cs).
 - Авторизация/аутентификация через единый сервис (JWT)
-  - Реализовано: `IdentityService` (ASP.NET Identity) — регистрация/логин, выдача JWT — см. [`AuthController.cs`](./src/Services/IdentityService/Controllers/AuthController.cs) и [`appsettings.json`](./src/Services/IdentityService/appsettings.json).
+  - Реализовано: `IdentityService` (ASP.NET Identity) — регистрация/логин, выдача JWT — см. [`AuthController.cs`](./src/Services/IdentityService/Controllers/AuthController.cs) и [`appsettings.json`](./src/Services/IdentityService/appsettings.json). Write‑эндпойнты защищены `[Authorize]` (Catalog, Order, Монолит).
 - Кэширование данных в Redis
   - Реализовано: кэширование каталога в `CatalogService` — см. [`ProductsController.cs`](./src/Services/CatalogService/Controllers/ProductsController.cs), настройки Redis — [`appsettings.json`](./src/Services/CatalogService/appsettings.json). Монолит также настроен на Redis.
 - Подключение к БД
@@ -161,8 +162,9 @@ public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } 
 - [x] База данных PostgreSQL (EF Core)
 - [x] Swagger/OpenAPI, React UI, трассировка `X-Trace-Id`
 - [x] Transactional Outbox (MassTransit EF Outbox + Bus Outbox) в `OrderService`
-- [ ] `[Authorize]` на бизнес‑эндпойнтах — по требованию
-- [ ] Тесты и CI/CD
+- [x] JWT‑защита write‑эндпойнтов (`[Authorize]`)
+- [x] CI (GitHub Actions)
+- [ ] Тесты
 
 ## Технологии
 

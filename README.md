@@ -3,6 +3,7 @@
 Интернет‑магазин: монолит (Clean Architecture) и набор микросервисов. Реализованы JWT‑аутентификация, обмен событиями через RabbitMQ (MassTransit), кэширование Redis, БД PostgreSQL, фронтенд на React (Vite + Chakra UI), полная контейнеризация Docker.
 
 ![.NET](https://img.shields.io/badge/.NET-9-512BD4?logo=dotnet&logoColor=white) ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4) ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.x-FF6600?logo=rabbitmq&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white) ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=061A23)
+[![CI](https://github.com/A-Mak7u/web2/actions/workflows/ci.yml/badge.svg)](https://github.com/A-Mak7u/web2/actions/workflows/ci.yml)
 
 ## Содержание
 - **[Архитектура и компоненты](#архитектура-и-компоненты)**
@@ -52,6 +53,26 @@ src/
 - **Каталог (CatalogService)**: чтение товаров из PostgreSQL, ответы кэшируются в Redis на несколько минут. При добавлении товара кэш инвалидацируется.
 - **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Это пример хореографии распределённой транзакции.
 - **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Публикация событий в `OrderService` выполняется через транзакционный outbox (MassTransit EF Outbox + Bus Outbox) для атомарности. Это пример хореографии распределённой транзакции.
+
+```
+Identity (JWT)
+   |          
+   |  login/register → accessToken
+   v          
+Frontend ———— create order ———→ OrderService
+                               |  (save Order; Outbox Publish: OrderCreated)
+                               v
+                          RabbitMQ
+                               |
+                               v
+                         PaymentService
+                               |  (process; Publish: PaymentCompleted)
+                               v
+                             RabbitMQ
+                               |
+                               v
+                           OrderService (update status: Paid/Failed)
+```
 - **Монолит**: содержит схожие функции (продукты, заказы) внутри одного приложения и общей БД/кэша, демонстрируя подход Clean Architecture.
 - **Трассировка**: сервисы принимают заголовок `X-Trace-Id` и пишут сообщения в локальное хранилище событий; фронтенд собирает ленту из всех сервисов и показывает тайм‑линию.
  - **Безопасность**: write‑эндпойнты защищены JWT (`[Authorize]`) в CatalogService, OrderService и Монолите; чтение (GET) оставлено публичным для удобства демонстрации.

@@ -3,6 +3,7 @@ using Monolith.Domain;
 
 namespace Monolith.Infrastructure;
 
+// единый контекст EF Core для монолита (продукты, заказы и др.)
 public class MonolithDbContext : DbContext
 {
     public MonolithDbContext(DbContextOptions<MonolithDbContext> options) : base(options)

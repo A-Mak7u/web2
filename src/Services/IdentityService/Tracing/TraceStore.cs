@@ -4,6 +4,7 @@ namespace IdentityService.Api.Tracing;
 
 public record TraceEvent(DateTime TimestampUtc, string Service, string Message);
 
+// простое in-memory хранилище событий для трейсинга
 public class TraceStore
 {
     private readonly ConcurrentDictionary<string, List<TraceEvent>> _events = new();

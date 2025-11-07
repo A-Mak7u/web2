@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CatalogService.Api.Data;
 
+// контекст EF Core для каталога (товары и категории)
 public class CatalogDbContext : DbContext
 {
     public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options)

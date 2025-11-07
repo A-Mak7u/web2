@@ -1,0 +1,24 @@
+# dotnet
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+# node
+node_modules/
+dist/
+.vite/
+
+# logs
+*.log
+
+# env
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+

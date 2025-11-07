@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Api.Data;
 
+// контекст ASP.NET Identity (пользователи/роли)
 public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

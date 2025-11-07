@@ -51,6 +51,7 @@ src/
 - **Аутентификация (IdentityService)**: регистрация и вход пользователя с выдачей JWT. Токен используется клиентом при обращении к защищённым API (в проекте показана выдача и потребление токена; строгие политики можно включить атрибутами `[Authorize]`).
 - **Каталог (CatalogService)**: чтение товаров из PostgreSQL, ответы кэшируются в Redis на несколько минут. При добавлении товара кэш инвалидацируется.
 - **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Это пример хореографии распределённой транзакции.
+- **Оформление заказа (OrderService ↔ PaymentService)**: после создания заказа публикуется событие `OrderCreated` (RabbitMQ/MassTransit). Платёжный сервис получает событие, имитирует обработку и публикует `PaymentCompleted`. Сервис заказов принимает событие и обновляет статус заказа. Публикация событий в `OrderService` выполняется через транзакционный outbox (MassTransit EF Outbox + Bus Outbox) для атомарности. Это пример хореографии распределённой транзакции.
 - **Монолит**: содержит схожие функции (продукты, заказы) внутри одного приложения и общей БД/кэша, демонстрируя подход Clean Architecture.
 - **Трассировка**: сервисы принимают заголовок `X-Trace-Id` и пишут сообщения в локальное хранилище событий; фронтенд собирает ленту из всех сервисов и показывает тайм‑линию.
 
@@ -138,7 +139,7 @@ public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } 
 - Реализовать пример распределённой транзакции (оркестрация/хореография)
   - Реализовано: хореография через события `OrderCreated` → `PaymentCompleted` на RabbitMQ. Публикация — [`OrderService/Controllers/OrdersController.cs`](./src/Services/OrderService/Controllers/OrdersController.cs), обработка — [`PaymentService/Consumers/OrderCreatedConsumer.cs`](./src/Services/PaymentService/Consumers/OrderCreatedConsumer.cs), фиксация статуса — [`OrderService/Consumers/PaymentCompletedConsumer.cs`](./src/Services/OrderService/Consumers/PaymentCompletedConsumer.cs).
 - Реализовать асинхронное взаимодействие с использованием паттерна transaction outbox или transaction inbox
-  - Реализовано: асинхронное взаимодействие через шину; демонстрация упрощённого варианта без отдельной таблицы EF Outbox. Переход на полноценный Outbox обозначен в коде `OrderService`.
+  - Реализовано: транзакционный Outbox в `OrderService` (MassTransit EF Outbox + Bus Outbox) — см. [`OrderService/Program.cs`](./src/Services/OrderService/Program.cs) и модель контекста с сущностями inbox/outbox — [`OrderService/Data/OrderDbContext.cs`](./src/Services/OrderService/Data/OrderDbContext.cs).
 - Подключить шину данных (RabbitMQ)
   - Реализовано: MassTransit + RabbitMQ — конфиг в `Program.cs` сервисов: [`OrderService`](./src/Services/OrderService/Program.cs), [`PaymentService`](./src/Services/PaymentService/Program.cs).
 - Авторизация/аутентификация через единый сервис (JWT)
@@ -159,7 +160,7 @@ public interface PaymentCompleted { Guid OrderId { get; } bool Success { get; } 
 - [x] Кэш Redis (Catalog, Monolith)
 - [x] База данных PostgreSQL (EF Core)
 - [x] Swagger/OpenAPI, React UI, трассировка `X-Trace-Id`
-- [ ] Transactional Outbox (EF) — не включён, возможна активация при необходимости
+- [x] Transactional Outbox (MassTransit EF Outbox + Bus Outbox) в `OrderService`
 - [ ] `[Authorize]` на бизнес‑эндпойнтах — по требованию
 - [ ] Тесты и CI/CD
 

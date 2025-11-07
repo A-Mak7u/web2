@@ -281,7 +281,7 @@ export function App() {
                         <Text>{(ci.product.price * ci.quantity).toFixed(2)} ₽</Text>
                       </Flex>
                     ))}
-                    <Flex align="center" justify="space_between" fontWeight="bold" pt={2}>
+                    <Flex align="center" justify="space-between" fontWeight="bold" pt={2}>
                       <Text>Итого</Text>
                       <Text>{cart.reduce((s, ci) => s + ci.product.price * ci.quantity, 0).toFixed(2)} ₽</Text>
                     </Flex>

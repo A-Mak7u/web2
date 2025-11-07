@@ -34,7 +34,13 @@ builder.Services.AddMassTransit(x =>
 
     x.AddConsumer<PaymentCompletedConsumer>();
 
-    // Outbox отключён для простоты (демо)
+    // транзакционный outbox на EF Core (постгрес); bus outbox гарантирует атомарность Publish внутри транзакции
+    x.AddEntityFrameworkOutbox<OrderDbContext>(o =>
+    {
+        o.QueryDelay = TimeSpan.FromSeconds(1);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
 
     x.UsingRabbitMq((context, cfg) =>
     {
